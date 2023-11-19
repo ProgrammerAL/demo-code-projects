@@ -16,3 +16,12 @@ public class ServiceConfig
     [Required, NotNull]
     public string? Version { get; set; }
 }
+
+public class StorageConfig
+{
+    [Required, NotNull]
+    public string? Endpoint { get; set; }
+
+    [Required, NotNull]
+    public string? TableName { get; set; }
+}

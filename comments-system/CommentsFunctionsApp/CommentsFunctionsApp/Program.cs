@@ -1,10 +1,15 @@
 using CommentsFunctionsApp;
+using CommentsFunctionsApp.Middleware;
 
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 
 var host = new HostBuilder()
+    .ConfigureFunctionsWorkerDefaults(workerApplication =>
+    {
+        workerApplication.UseMiddleware<ExceptionHandlerMiddleware>();
+    })
     .ConfigureAppConfiguration(x =>
     {
 #if DEBUG
@@ -14,13 +19,20 @@ var host = new HostBuilder()
     })
     .ConfigureServices(serviceCollection =>
     {
-        serviceCollection.AddOptions<ServiceConfig>()
-        .Configure<IConfiguration>((settings, configuration) =>
-        {
-            configuration.GetSection(nameof(ServiceConfig)).Bind(settings);
-        });
+        AddConfigOptions<ServiceConfig>(serviceCollection);
+        AddConfigOptions<StorageConfig>(serviceCollection);
     })
-    .ConfigureFunctionsWorkerDefaults()
     .Build();
 
 host.Run();
+
+
+static void AddConfigOptions<TOptions>(IServiceCollection serviceCollection)
+    where TOptions : class
+{
+    serviceCollection.AddOptions<TOptions>()
+    .Configure<IConfiguration>((settings, configuration) =>
+    {
+        configuration.GetSection(typeof(TOptions).Name).Bind(settings);
+    });
+}
