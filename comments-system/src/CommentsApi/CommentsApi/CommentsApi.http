@@ -1,0 +1,6 @@
+@CommentsApi_HostAddress = http://localhost:5015
+
+GET {{CommentsApi_HostAddress}}/health/
+Accept: application/json
+
+###
