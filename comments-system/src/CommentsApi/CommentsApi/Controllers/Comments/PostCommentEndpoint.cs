@@ -1,49 +1,45 @@
 ﻿using System.ComponentModel.DataAnnotations;
 using System.Diagnostics.CodeAnalysis;
-using System.Net;
 
 using Ardalis.ApiEndpoints;
 
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.Extensions.Options;
+
+using ProgrammerAl.CommentsApi.DB.Repositories;
+
+using Swashbuckle.AspNetCore.Annotations;
 
 namespace ProgrammerAl.CommentsApi.Controllers.Comments;
 
-public class PostCommentEndpoint : EndpointBaseSync
-    .WithRequest<PostCommentEndpoint.StoreCommentsRequest>
-    .WithActionResult<PostCommentEndpoint.ResponseObj>
+public class PostCommentEndpoint : EndpointBaseAsync
+    .WithRequest<PostCommentEndpointRequest>
+    .WithActionResult<PostCommentEndpointResponse>
 {
-    private readonly IOptions<StorageConfig> _storageConfig;
+    private readonly ICommentsRepository _commentsRepository;
 
-    public PostCommentEndpoint(IOptions<StorageConfig> storageConfig)
+    public PostCommentEndpoint(ICommentsRepository commentsRepository)
     {
-        _storageConfig = storageConfig;
+        _commentsRepository = commentsRepository;
     }
 
-    public override ActionResult<ResponseObj> Handle(StoreCommentsRequest request)
+    [HttpPost("/add-comment")]
+    [SwaggerOperation(
+        Summary = "Adds a comment",
+        Description = "Adds a comment",
+        OperationId = nameof(PostCommentEndpoint),
+        Tags = new[] { "Comments" })
+    ]
+    public override async Task<ActionResult<PostCommentEndpointResponse>> HandleAsync(PostCommentEndpointRequest request, CancellationToken cancellationToken = default)
     {
-        var itemKey = Guid.NewGuid().ToString();
-
-        var tableClient = new TableClient(_storageConfig.Value.Endpoint, _storageConfig.Value.TableName);
-
-        await tableClient.CreateIfNotExistsAsync();
-
-        // Make a dictionary entity by defining a <see cref="TableEntity">.
-        var tableEntity = new TableEntity(itemKey, itemKey)
-        {
-            { "Comments", requestObject.Comments },
-        };
-
-        await tableClient.AddEntityAsync(tableEntity);
-
-        return req.CreateResponse(HttpStatusCode.NoContent);
+        await _commentsRepository.StoreNewCommentAsync(request.Comments);
+        return NoContent();
     }
-
-    public class StoreCommentsRequest
-    {
-        [FromBody, Required(AllowEmptyStrings = false), NotNull]
-        public string? Comments { get; set; }
-    }
-    public record ResponseObj(string Comments);
-
 }
+
+public class PostCommentEndpointRequest
+{
+    [Required(AllowEmptyStrings = false), NotNull]
+    public string? Comments { get; set; }
+}
+
+public record PostCommentEndpointResponse();

@@ -1,4 +1,8 @@
+using Microsoft.EntityFrameworkCore;
+
 using ProgrammerAl.CommentsApi;
+using ProgrammerAl.CommentsApi.DB;
+using ProgrammerAl.CommentsApi.DB.Repositories;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -19,6 +23,11 @@ builder.Services.AddSwaggerGen(x =>
 {
     x.EnableAnnotations();
 });
+
+builder.Services.AddDbContextPool<CommentsDbContext>(options =>
+  options.UseSqlServer(builder.Configuration.GetConnectionString("SchoolContext")));
+
+builder.Services.AddScoped<ICommentsRepository, CommentsRepository>();
 
 var app = builder.Build();
 

@@ -9,7 +9,7 @@ namespace ProgrammerAl.CommentsApi.Controllers.Status;
 
 public class GetHealthCheckEndpoint : EndpointBaseSync
     .WithoutRequest
-    .WithActionResult<GetHealthCheckEndpoint.ResponseObj>
+    .WithActionResult<GetHealthCheckEndpointResponse>
 {
     private readonly IOptions<ServiceConfig> _serviceConfig;
 
@@ -25,11 +25,11 @@ public class GetHealthCheckEndpoint : EndpointBaseSync
         OperationId = nameof(GetHealthCheckEndpoint),
         Tags = new[] { "Status" })
     ]
-    public override ActionResult<ResponseObj> Handle()
+    public override ActionResult<GetHealthCheckEndpointResponse> Handle()
     {
-        var responseObject = new ResponseObj(Version: _serviceConfig.Value.Version, Environment: _serviceConfig.Value.Environment, ResponseTime: DateTime.UtcNow);
+        var responseObject = new GetHealthCheckEndpointResponse(Version: _serviceConfig.Value.Version, Environment: _serviceConfig.Value.Environment, ResponseTime: DateTime.UtcNow);
         return Ok(responseObject);
     }
-
-    public record ResponseObj(string Version, string Environment, DateTime ResponseTime);
 }
+
+public record GetHealthCheckEndpointResponse(string Version, string Environment, DateTime ResponseTime);
