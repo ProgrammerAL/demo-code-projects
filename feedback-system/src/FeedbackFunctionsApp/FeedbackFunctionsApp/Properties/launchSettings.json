@@ -1,6 +1,6 @@
 {
   "profiles": {
-    "CommentsFunctionsApp": {
+    "FeedbackFunctionsApp": {
       "commandName": "Project",
       "commandLineArgs": "--port 7025",
       "launchBrowser": false

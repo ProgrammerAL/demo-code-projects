@@ -5,7 +5,7 @@ using Microsoft.Azure.Functions.Worker.Middleware;
 using System.Net;
 using System.Reflection;
 
-namespace CommentsFunctionsApp.Middleware;
+namespace FeedbackFunctionsApp.Middleware;
 
 public class ExceptionHandlerMiddleware : IFunctionsWorkerMiddleware
 {

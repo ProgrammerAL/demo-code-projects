@@ -8,7 +8,7 @@ using Microsoft.Azure.Functions.Worker.Http;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Options;
 
-namespace CommentsFunctionsApp.Functions.StoreComment;
+namespace FeedbackFunctionsApp.Functions.StoreComment;
 
 public class StoreCommentsFunction
 {

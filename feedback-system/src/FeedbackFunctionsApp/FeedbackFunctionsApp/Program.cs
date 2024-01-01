@@ -1,5 +1,5 @@
-using CommentsFunctionsApp;
-using CommentsFunctionsApp.Middleware;
+using FeedbackFunctionsApp;
+using FeedbackFunctionsApp.Middleware;
 
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;

@@ -5,7 +5,7 @@ using Microsoft.Azure.Functions.Worker.Http;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Options;
 
-namespace CommentsFunctionsApp.Functions.Status;
+namespace FeedbackFunctionsApp.Functions.Status;
 
 public class StatusFunction
 {

@@ -1,7 +1,7 @@
 
-using CommentsFunctionsApp.Exceptions;
+using FeedbackFunctionsApp.Exceptions;
 
-namespace CommentsFunctionsApp.Functions;
+namespace FeedbackFunctionsApp.Functions;
 
 public record StoreCommentsRequest(string Comments);
 
