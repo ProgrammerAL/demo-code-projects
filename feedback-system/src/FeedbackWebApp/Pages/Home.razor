@@ -13,7 +13,7 @@
 
     protected override void OnInitialized()
     {
-        var payload = $"{NavManager.BaseUri}/feedback";
+        var payload = $"{NavManager.BaseUri}/comments";
         var qrGenerator = new QRCodeGenerator();
         var qrCodeData = qrGenerator.CreateQrCode(payload, QRCodeGenerator.ECCLevel.Q);
         var graphic = new Base64QRCode(qrCodeData);
