@@ -2,7 +2,6 @@ using System.Net;
 using System.Text;
 using Microsoft.Azure.Functions.Worker;
 using Microsoft.Azure.Functions.Worker.Http;
-using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Options;
 
 namespace FeedbackFunctionsApp.Functions.Status;
