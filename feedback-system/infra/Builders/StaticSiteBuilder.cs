@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Collections.Immutable;
+using System.IO;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
@@ -16,12 +17,15 @@ using Pulumi.AzureNative.Web.Inputs;
 
 using PulumiInfra.Config;
 
-using Pulumi.AzureStaticWebsite;
+using static PulumiInfra.Builders.StaticSiteResources;
+
+using AzureNative = Pulumi.AzureNative;
 
 namespace PulumiInfra.Builders;
 
-public record StaticSiteResources()
+public record StaticSiteResources(SiteStorageInfra StorageInfra)
 {
+    public record SiteStorageInfra(StorageAccount StireStorageAccount, StorageAccountStaticWebsite StaticSiteAccount);
 }
 
 public record StaticSiteBuilder(
@@ -30,32 +34,56 @@ public record StaticSiteBuilder(
 {
     public StaticSiteResources Build()
     {
-        var website = new Website("static-site", new WebsiteArgs
+        var siteStorageInfra = GenerateSiteInfra();
+        return new StaticSiteResources(siteStorageInfra);
+    }
+
+    private SiteStorageInfra GenerateSiteInfra()
+    {
+        var storageAccount = new StorageAccount("sitestorage", new StorageAccountArgs
         {
-            SitePath = GlobalConfig.StaticSiteConfig.StaticSitePath,
-            DomainResourceGroup = ResourceGroup.Name
-        }, new ComponentResourceOptions
-        { 
-            Provider = new Pulumi.AzureStaticWebsite.Provider("static-site-provider", args: new Pulumi.AzureStaticWebsite.ProviderArgs
-            { 
-                
-            })
+            ResourceGroupName = ResourceGroup.Name,
+            AllowBlobPublicAccess = true,
+            Sku = new AzureNative.Storage.Inputs.SkuArgs
+            {
+                Name = AzureNative.Storage.SkuName.Standard_GRS,
+            },
+            Kind = Kind.StorageV2,
+            EnableHttpsTrafficOnly = true,
+            MinimumTlsVersion = MinimumTlsVersion.TLS1_2,
+            AccessTier = AccessTier.Hot,
+            AllowSharedKeyAccess = true,
+            SasPolicy = new AzureNative.Storage.Inputs.SasPolicyArgs
+            {
+                ExpirationAction = ExpirationAction.Log,
+                SasExpirationPeriod = "00.01:00:00"
+            },
         });
 
-        //var staticSite = new StaticSite("static-site", new()
-        //{
-        //    Location = ResourceGroup.Location,
-        //    ResourceGroupName = ResourceGroup.Name,
-        //    Sku = new SkuDescriptionArgs
-        //    {
-        //        Name = "Basic",
-        //        Tier = "Basic",
-        //    },
-        //    BuildProperties = new StaticSiteBuildPropertiesArgs
-        //    { 
+        var siteStorageAccount = new StorageAccountStaticWebsite("staticsiteaccount", new StorageAccountStaticWebsiteArgs
+        {
+            ResourceGroupName = ResourceGroup.Name,
+            IndexDocument = "index.html",
+            Error404Document = "index.html",
+            AccountName = storageAccount.Name
+        });
 
-        //    }
-        //});
-        return new StaticSiteResources();
+        var fullSearchPath = Path.GetFullPath(GlobalConfig.StaticSiteConfig.StaticSitePath);
+        foreach (var fullFilePath in Directory.GetFiles(fullSearchPath, searchPattern: "*.*", SearchOption.AllDirectories))
+        {
+            var relativeFilePath = fullFilePath.Substring(fullSearchPath.Length).Trim('/').Trim('\\');
+            var fileName = Path.GetFileName(fullFilePath);
+            _ = new Blob(fileName, new BlobArgs
+            {
+                AccountName = storageAccount.Name,
+                ContainerName = "$web",
+                AccessTier = BlobAccessTier.Hot,
+                ResourceGroupName = ResourceGroup.Name,
+                Source = new FileAsset(fullFilePath),
+                BlobName = relativeFilePath,
+            });
+        }
+
+        return new SiteStorageInfra(storageAccount, siteStorageAccount);
     }
 }

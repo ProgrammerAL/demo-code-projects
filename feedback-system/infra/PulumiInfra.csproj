@@ -10,7 +10,6 @@
 	<ItemGroup>
 		<PackageReference Include="Pulumi" Version="3.59.0" />
 		<PackageReference Include="Pulumi.AzureNative" Version="2.24.0" />
-		<PackageReference Include="Pulumi.AzureStaticWebsite" Version="0.0.5" />
 	</ItemGroup>
 
 </Project>

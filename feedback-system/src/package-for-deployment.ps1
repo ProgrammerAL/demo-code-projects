@@ -5,6 +5,7 @@ if (Test-Path -Path $publishedAppsDirectory) {
 }
 
 New-Item -Path $publishedAppsDirectory -ItemType Directory
+New-Item -Path "$publishedAppsDirectory/webapp" -ItemType Directory
 
 #Sanity check, make sure we're running from the proper loction
 Set-Location "$PSScriptRoot/FeedbackFunctionsApp"
@@ -13,4 +14,7 @@ Compress-Archive -Path "$PSScriptRoot/FeedbackFunctionsApp/bin/Release/net8.0/pu
 
 Set-Location "$PSScriptRoot/FeedbackWebApp"
 & "dotnet" publish -c Release
-Compress-Archive -Path "$PSScriptRoot/FeedbackWebApp/bin/Release/net8.0/*" -DestinationPath "$publishedAppsDirectory/webapp.zip"
+#Compress-Archive -Path "$PSScriptRoot/FeedbackWebApp/bin/Release/net8.0/*" -DestinationPath "$publishedAppsDirectory/webapp.zip"
+Copy-Item -Path "$PSScriptRoot/FeedbackWebApp/bin/Release/net8.0/*" -Destination "$publishedAppsDirectory/webapp"
+Remove-Item -Path "$publishedAppsDirectory/webapp/browser-wasm" -Recurse
+Remove-Item -Path "$publishedAppsDirectory/webapp/publish" -Recurse
