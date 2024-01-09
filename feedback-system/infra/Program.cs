@@ -20,7 +20,7 @@ return await Pulumi.Deployment.RunAsync(async () =>
     var apiBuilder = new ApiBuilder(globalConfig, resourceGroup);
     var apiResources = apiBuilder.Build();
 
-    var staticSiteBuilder = new StaticSiteBuilder(globalConfig, resourceGroup);
+    var staticSiteBuilder = new StaticSiteBuilder(globalConfig, resourceGroup, apiResources);
     _ = staticSiteBuilder.Build();
 
     return new Dictionary<string, object?>

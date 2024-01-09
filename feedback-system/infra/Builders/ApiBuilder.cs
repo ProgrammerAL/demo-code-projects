@@ -103,6 +103,10 @@ public record ApiBuilder(
         var functionAppSiteConfig = new SiteConfigArgs
         {
             LinuxFxVersion = "DOTNET-ISOLATED|8.0",
+            Cors = new CorsSettingsArgs
+            {
+                AllowedOrigins = new[] { "*" }
+            },
             AppSettings = new[]
             {
                 new NameValuePairArgs{

@@ -17,7 +17,7 @@
         var qrGenerator = new QRCodeGenerator();
         var qrCodeData = qrGenerator.CreateQrCode(payload, QRCodeGenerator.ECCLevel.Q);
         var graphic = new Base64QRCode(qrCodeData);
-        var base64EncodedImage = graphic.GetGraphic(pixelsPerModule: 30, darkColor: Color.Black, lightColor: Color.Transparent, drawQuietZones: false, imgType: Base64QRCode.ImageType.Png);
+        var base64EncodedImage = graphic.GetGraphic(pixelsPerModule: 20, darkColor: Color.Black, lightColor: Color.Transparent, drawQuietZones: false, imgType: Base64QRCode.ImageType.Png);
 
         QrCodeImageUrl = string.Format("data:image/png;base64,{0}", base64EncodedImage);
 

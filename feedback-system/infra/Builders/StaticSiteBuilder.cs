@@ -4,6 +4,7 @@ using System.Collections.Immutable;
 using System.IO;
 using System.Linq;
 using System.Text;
+using System.Text.Json.Nodes;
 using System.Threading.Tasks;
 
 using Pulumi;
@@ -16,6 +17,7 @@ using Pulumi.AzureNative.Web;
 using Pulumi.AzureNative.Web.Inputs;
 
 using PulumiInfra.Config;
+using PulumiInfra.Utilities;
 
 using static PulumiInfra.Builders.StaticSiteResources;
 
@@ -30,7 +32,8 @@ public record StaticSiteResources(SiteStorageInfra StorageInfra)
 
 public record StaticSiteBuilder(
     GlobalConfig GlobalConfig,
-    ResourceGroup ResourceGroup)
+    ResourceGroup ResourceGroup,
+    ApiResources ApiResources)
 {
     public StaticSiteResources Build()
     {
@@ -68,22 +71,58 @@ public record StaticSiteBuilder(
             AccountName = storageAccount.Name
         });
 
-        var fullSearchPath = Path.GetFullPath(GlobalConfig.StaticSiteConfig.StaticSitePath);
-        foreach (var fullFilePath in Directory.GetFiles(fullSearchPath, searchPattern: "*.*", SearchOption.AllDirectories))
+        _ = ApiResources.Function.HttpsEndpoint.Apply(apiEndpoint =>
         {
-            var relativeFilePath = fullFilePath.Substring(fullSearchPath.Length).Trim('/').Trim('\\');
-            var fileName = Path.GetFileName(fullFilePath);
-            _ = new Blob(fileName, new BlobArgs
+            var appsettingsFilePath = $"{GlobalConfig.StaticSiteConfig.StaticSitePath}/appsettings.json";
+            WriteConfigFiles(appsettingsFilePath, apiEndpoint);
+
+            //Create Pulumi entries for each file to upload
+            var fullSearchPath = Path.GetFullPath(GlobalConfig.StaticSiteConfig.StaticSitePath);
+            var allFiles = Directory.EnumerateFiles(fullSearchPath, searchPattern: "*", SearchOption.AllDirectories);
+            foreach (var fullFilePath in allFiles)
             {
-                AccountName = storageAccount.Name,
-                ContainerName = "$web",
-                AccessTier = BlobAccessTier.Hot,
-                ResourceGroupName = ResourceGroup.Name,
-                Source = new FileAsset(fullFilePath),
-                BlobName = relativeFilePath,
-            });
-        }
+                var relativeFilePath = fullFilePath.Substring(fullSearchPath.Length).Trim('/').Trim('\\');
+                var fileName = Path.GetFileName(fullFilePath);
+                _ = new Blob(fileName, new BlobArgs
+                {
+                    AccountName = storageAccount.Name,
+                    ContainerName = "$web",
+                    AccessTier = BlobAccessTier.Hot,
+                    ResourceGroupName = ResourceGroup.Name,
+                    Source = new FileAsset(fullFilePath),
+                    ContentType = FileUtilities.DetermineFileContentType(fullFilePath),
+                    BlobName = relativeFilePath,
+                });
+            }
+
+            //Need to return something even though we don't use the returned value
+            return "";
+        });
+
 
         return new SiteStorageInfra(storageAccount, siteStorageAccount);
+    }
+
+    private void WriteConfigFiles(string appsettingsFilePath, string apiEndpoint)
+    {
+        //Write a new appsettings.json file for the blazor client
+        JsonNode appSettingsJson = JsonNode.Parse("{}")!;
+        AddApiConfigValues(appSettingsJson, apiEndpoint);
+
+        var contents = StringContentUtilities.GenerateCompressedStringContent(appSettingsJson);
+
+        File.WriteAllText($"{appsettingsFilePath}", contents.Content);
+        File.WriteAllBytes($"{appsettingsFilePath}.br", contents.BrotliContent);
+        File.WriteAllBytes($"{appsettingsFilePath}.gz", contents.GZipContent);
+    }
+
+    private void AddApiConfigValues(JsonNode appSettingsJson, string apiEndpoint)
+    {
+        var jsonObject = new JsonObject
+        {
+            ["FeedbackEndpoint"] = apiEndpoint,
+        };
+
+        appSettingsJson["ApiConfig"] = jsonObject;
     }
 }
