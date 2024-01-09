@@ -17,7 +17,10 @@ return await Pulumi.Deployment.RunAsync(async () =>
         Location = globalConfig.ApiConfig.Location
     });
 
-    var apiBuilder = new ApiBuilder(globalConfig, resourceGroup);
+    var persistentStorageBuilder = new PersistentStorageBuilder(globalConfig, resourceGroup);
+    var persistenceResources = persistentStorageBuilder.Build();
+
+    var apiBuilder = new ApiBuilder(globalConfig, resourceGroup, persistenceResources);
     var apiResources = apiBuilder.Build();
 
     var staticSiteBuilder = new StaticSiteBuilder(globalConfig, resourceGroup, apiResources);

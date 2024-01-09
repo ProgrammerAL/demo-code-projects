@@ -49,7 +49,7 @@ public record StaticSiteBuilder(
             AllowBlobPublicAccess = true,
             Sku = new AzureNative.Storage.Inputs.SkuArgs
             {
-                Name = AzureNative.Storage.SkuName.Standard_GRS,
+                Name = AzureNative.Storage.SkuName.Standard_LRS,
             },
             Kind = Kind.StorageV2,
             EnableHttpsTrafficOnly = true,
@@ -120,7 +120,7 @@ public record StaticSiteBuilder(
     {
         var jsonObject = new JsonObject
         {
-            ["FeedbackEndpoint"] = apiEndpoint,
+            ["FeedbackEndpoint"] = $"{apiEndpoint}/api",
         };
 
         appSettingsJson["ApiConfig"] = jsonObject;

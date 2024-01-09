@@ -2,10 +2,10 @@ using System.Net;
 using System.Text;
 
 using Azure.Data.Tables;
+using Azure.Identity;
 
 using Microsoft.Azure.Functions.Worker;
 using Microsoft.Azure.Functions.Worker.Http;
-using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Options;
 
 namespace FeedbackFunctionsApp.Functions.StoreComment;
@@ -31,7 +31,8 @@ public class StoreCommentsFunction
         var requestObject = requestDto.GenerateValidObject();
         var itemKey = Guid.NewGuid().ToString();
 
-        var tableClient = new TableClient(_storageConfig.Value.Endpoint, _storageConfig.Value.TableName);
+        var tableUri = new Uri(_storageConfig.Value.Endpoint);
+        var tableClient = new TableClient(tableUri, _storageConfig.Value.TableName, new DefaultAzureCredential());
 
         await tableClient.CreateIfNotExistsAsync();
 

@@ -7,10 +7,20 @@
 <div class="container">
     <div class="row">
         <p>Enter Comments:</p>
-        <textarea @bind=@FeedbackText cols="40" rows="5"></textarea>
+        <textarea @bind=@FeedbackText
+                  cols="40"
+                  rows="5"
+                  disabled="@(PageState == PageStateType.Submitting)"></textarea>
     </div>
     <div class="row p-2">
-        <button @onclick="SubmitFeedbackAsync" class="btn-primary">Submit</button>
+        @if (PageState == PageStateType.Submitting)
+        {
+            <p>Submitting...</p>
+        }
+        else
+        {
+            <button @onclick="SubmitFeedbackAsync" class="btn-primary">Submit</button>
+        }
     </div>
 
     @if (!string.IsNullOrWhiteSpace(ErrorResult))

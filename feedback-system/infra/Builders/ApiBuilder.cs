@@ -28,7 +28,8 @@ public record ApiResources(ApiResources.ServiceStorageInfra ServiceStorage, ApiR
 
 public record ApiBuilder(
     GlobalConfig GlobalConfig,
-    ResourceGroup ResourceGroup)
+    ResourceGroup ResourceGroup,
+    PersistentStorageResources PersistenceResources)
 {
     public ApiResources Build()
     {
@@ -46,7 +47,7 @@ public record ApiBuilder(
             ResourceGroupName = ResourceGroup.Name,
             Sku = new AzureNative.Storage.Inputs.SkuArgs
             {
-                Name = AzureNative.Storage.SkuName.Standard_GRS,
+                Name = AzureNative.Storage.SkuName.Standard_LRS,
             },
             Kind = Kind.StorageV2,
             EnableHttpsTrafficOnly = true,
@@ -100,6 +101,8 @@ public record ApiBuilder(
             Reserved = true,
         });
 
+        var tableEndpoint = PersistenceResources.StorageInfra.StorageAccount.Name.Apply(x => $"https://{x}.table.core.windows.net");
+
         var functionAppSiteConfig = new SiteConfigArgs
         {
             LinuxFxVersion = "DOTNET-ISOLATED|8.0",
@@ -141,6 +144,16 @@ public record ApiBuilder(
                 {
                     Name = "ServiceConfig__Environment",
                     Value = GlobalConfig.ServiceConfig.Environment,
+                },
+                new NameValuePairArgs
+                {
+                    Name = "StorageConfig__Endpoint",
+                    Value = tableEndpoint,
+                },
+                new NameValuePairArgs
+                {
+                    Name = "StorageConfig__TableName",
+                    Value = "Comments",
                 }
             }
         };
@@ -181,10 +194,27 @@ public record ApiBuilder(
             RoleDefinitionId = blobOwnerRoleDefinitionId,
             Scope = storageInfra.StorageAccount.Id
         });
+
+
+        var tableContributorRoleId = GenerateStorageTableContributorRoleId(GlobalConfig.ApiConfig.ClientConfig.SubscriptionId);
+
+        //Allow the Azure Function Managed Identity to be able to read/write to table storage on this account
+        _ = new RoleAssignment("funcs-storage-table-contributor-role-assignment", new RoleAssignmentArgs
+        {
+            PrincipalId = functionPrincipalId,
+            PrincipalType = PrincipalType.ServicePrincipal,
+            RoleDefinitionId = tableContributorRoleId,
+            Scope = PersistenceResources.StorageInfra.StorageAccount.Id
+        });
     }
 
-    public static string GenerateStorageBlobDataOwnerRoleId(string subscriptionId)
+    private static string GenerateStorageBlobDataOwnerRoleId(string subscriptionId)
     {
-        return "/subscriptions/" + subscriptionId + "/providers/Microsoft.Authorization/roleDefinitions/" + "b7e6dc6d-f1e8-4753-8033-0f276bb0955b";
+        return "/subscriptions/" + subscriptionId + "/providers/Microsoft.Authorization/roleDefinitions/b7e6dc6d-f1e8-4753-8033-0f276bb0955b";
+    }
+
+    private static string GenerateStorageTableContributorRoleId(string subscriptionId)
+    {
+        return "/subscriptions/" + subscriptionId + "/providers/Microsoft.Authorization/roleDefinitions/0a9a7e1f-b9d0-4cc4-a60d-0319b160aaa3";
     }
 }
