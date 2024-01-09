@@ -1,7 +1,7 @@
 {
   "mainAssemblyName": "FeedbackWebApp",
   "resources": {
-    "hash": "sha256-RvG8NXibh3HalrmxN9qoMPQYkcgVNndLACfnVDAHKwo=",
+    "hash": "sha256-S2kT2lofPcoTUFaY1MsyK54nH9Ym+6es/tKv1JqE5ag=",
     "jsModuleNative": {
       "dotnet.native.8.0.0.qaj2ss5apn.js": "sha256-lCZIWWraj28SzbL/4ubyA9dZ+gpcx7hO1f/iKczVOEg="
     },
@@ -17,7 +17,7 @@
       "icudt_no_CJK.dat": "sha256-L7sV7NEYP37/Qr2FPCePo5cJqRgTXRwGHuwF5Q+0Nfs="
     },
     "assembly": {
-      "FeedbackWebApp.wasm": "sha256-kD5ygFLndZrE0AhH4l/GpjfC3nmbUK8WXD+DeuEYRwA=",
+      "FeedbackWebApp.wasm": "sha256-s0oPrQ5FRbDKgEPZvJRpV8oV0tdNOcmbPaKvVaztADs=",
       "Microsoft.AspNetCore.Components.wasm": "sha256-r7WMZNfLyj0UteFR9F6U5CZTu2RuoCxjpnGYiibCb08=",
       "Microsoft.AspNetCore.Components.Web.wasm": "sha256-RNAqR0ff+baVaIhI+uEcLo9eT+pxGnBEvkCzqD+3roM=",
       "Microsoft.AspNetCore.Components.WebAssembly.wasm": "sha256-xoh28NVaXD7wuMcAMf1gQcYvNK67n7jRtnUZOSxIQqY=",

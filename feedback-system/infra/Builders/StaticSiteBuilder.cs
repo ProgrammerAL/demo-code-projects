@@ -27,7 +27,7 @@ namespace PulumiInfra.Builders;
 
 public record StaticSiteResources(SiteStorageInfra StorageInfra)
 {
-    public record SiteStorageInfra(StorageAccount StireStorageAccount, StorageAccountStaticWebsite StaticSiteAccount);
+    public record SiteStorageInfra(StorageAccount SiteStorageAccount, StorageAccountStaticWebsite StaticSiteAccount);
 }
 
 public record StaticSiteBuilder(

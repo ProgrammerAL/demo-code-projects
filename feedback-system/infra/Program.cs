@@ -24,12 +24,13 @@ return await Pulumi.Deployment.RunAsync(async () =>
     var apiResources = apiBuilder.Build();
 
     var staticSiteBuilder = new StaticSiteBuilder(globalConfig, resourceGroup, apiResources);
-    _ = staticSiteBuilder.Build();
+    var staticSiteResources = staticSiteBuilder.Build();
 
     return new Dictionary<string, object?>
     {
         { "Readme", Output.Create(System.IO.File.ReadAllText("./Pulumi.README.md")) },
         { "FunctionHttpsEndpoint", apiResources.Function.HttpsEndpoint },
+        { "StaticSiteHttpsEndpoint", staticSiteResources.StorageInfra.SiteStorageAccount.PrimaryEndpoints.Apply(x => x.Web) },
     };
 });
 
