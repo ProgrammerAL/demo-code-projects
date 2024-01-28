@@ -1,0 +1,68 @@
+﻿@page "/comments"
+@using FeedbackWebApp.HttpClients
+@inject IFeedbackHttpClient FeedbackHttpClient
+
+<PageTitle>Comments</PageTitle>
+
+<div class="container">
+    <div class="row">
+        <p>Enter Comments:</p>
+        <textarea @bind=@FeedbackText
+                  cols="40"
+                  rows="5"
+                  disabled="@(PageState == PageStateType.Submitting)"></textarea>
+    </div>
+    <div class="row p-2">
+        @if (PageState == PageStateType.Submitting)
+        {
+            <p>Submitting...</p>
+        }
+        else
+        {
+            <button @onclick="SubmitFeedbackAsync" class="btn-primary">Submit</button>
+        }
+    </div>
+
+    @if (!string.IsNullOrWhiteSpace(ErrorResult))
+    {
+        <div class="row">
+            <p class="text-danger">Error: @ErrorResult</p>
+        </div>
+    }
+</div>
+
+@code {
+
+    private PageStateType PageState { get; set; } = PageStateType.Initial;
+    private string FeedbackText { get; set; } = "";
+    private string ErrorResult { get; set; } = "";
+
+    private async Task SubmitFeedbackAsync()
+    {
+        await UpdatePageStateAsync(PageStateType.Submitting);
+        var result = await FeedbackHttpClient.SubmitCommentsAsync(FeedbackText);
+        await UpdatePageStateAsync(PageStateType.Initial);
+
+        if (result.IsSuccessStatusCode)
+        {
+            FeedbackText = "";
+        }
+        else
+        {
+            ErrorResult = await result.Content.ReadAsStringAsync();
+        }
+    }
+
+    private async ValueTask UpdatePageStateAsync(PageStateType newValue)
+    {
+        PageState = newValue;
+        await InvokeAsync(StateHasChanged);
+    }
+
+
+    public enum PageStateType
+    {
+        Initial,
+        Submitting
+    }
+}

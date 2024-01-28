@@ -1,0 +1,9 @@
+config:
+  FeedbackSystem:azure-resource-group-name: dev-feedback-rg
+  FeedbackSystem:functions-package-path: ../src/published-apps/functions.zip
+  FeedbackSystem:location: eastus
+  FeedbackSystem:static-site-path: ../src/published-apps/webapp
+  FeedbackSystem:service-config: 
+    Version: dev-version-123
+    Environment: dev
+  pulumi:template: azure-csharp
