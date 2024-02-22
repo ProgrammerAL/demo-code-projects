@@ -13,7 +13,15 @@
 
     protected override void OnInitialized()
     {
-        var payload = $"{NavManager.BaseUri}/comments";
+        //Make sure only a single slash is at the end
+        //  Some browsers don't like that
+        var baseUri = NavManager.BaseUri;
+        if (baseUri.EndsWith('/'))
+        {
+            baseUri = baseUri.Substring(0, baseUri.Length - 1);
+        }
+
+        var payload = $"{baseUri}/comments";
         var qrGenerator = new QRCodeGenerator();
         var qrCodeData = qrGenerator.CreateQrCode(payload, QRCodeGenerator.ECCLevel.Q);
         var graphic = new Base64QRCode(qrCodeData);
